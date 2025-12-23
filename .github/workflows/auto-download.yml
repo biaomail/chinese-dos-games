@@ -1,0 +1,62 @@
+name: Auto Download and Commit Game Files
+
+on:
+  push:
+    branches:
+      - roms
+
+jobs:
+  update_roms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (shallow)
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Show disk usage before
+        run: |
+          echo "Disk space before download:" && df -h
+          du -sh . || true
+          du -sh bin || true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Run download_data.py
+        run: python download_data.py
+
+      - name: Show disk usage after
+        run: |
+          echo "Disk space after download:" && df -h
+          du -sh .
+          du -sh bin || true
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-lfs
+          git lfs install
+
+      - name: Track roms/*.zip with LFS
+        run: |
+          git lfs track 'roms/*.zip'
+          git add .gitattributes
+
+      - name: Add changes and commit if needed
+        run: |
+          git add roms/
+          git add wip.txt || true
+          git add done.txt || true
+          git add roms/mapping.txt || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Update ROMs via automation (with LFS)"
+            git push
+          fi
