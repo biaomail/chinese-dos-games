@@ -61,6 +61,7 @@ jobs:
 
       - name: Add changes and commit if needed
         run: |
+          git pull origin roms
           git add roms/
           git add wip.txt || true
           git add done.txt || true
