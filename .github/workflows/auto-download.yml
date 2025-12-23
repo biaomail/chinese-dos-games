@@ -29,7 +29,9 @@ jobs:
           python-version: '3.9'
 
       - name: Run download_data.py
-        run: python download_data.py
+        run: |
+          git pull origin roms
+          python download_data.py
 
       - name: Show disk usage after
         run: |
