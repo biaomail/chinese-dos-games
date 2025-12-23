@@ -1,5 +1,8 @@
 name: Auto Download and Commit Game Files
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -49,6 +52,12 @@ jobs:
         run: |
           git lfs track 'roms/*.zip'
           git add .gitattributes
+
+      - name: Set up git remote with PAT
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/biaomail/chinese-dos-games.git
 
       - name: Add changes and commit if needed
         run: |
